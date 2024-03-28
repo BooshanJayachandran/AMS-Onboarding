@@ -1,0 +1,14 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+package com.Onboarding3.AMS;
+option java_multiple_files =  true;
+
+message Test{
+  string testString = 1;
+}
+
+service TestService{
+  rpc testFunction(Test) returns (google.protobuf.Empty);
+  rpc testFunction2(google.protobuf.Empty) returns (google.protobuf.Empty);
+}
+
