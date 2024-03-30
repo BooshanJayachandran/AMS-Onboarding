@@ -1,0 +1,23 @@
+syntax="proto3";
+import "google/protobuf/empty.proto";
+package com.Onboarding3.AMS;
+option java_multiple_files =  true;
+
+
+message AdminDetails{
+  int32 adminId=1;
+  string name=2;
+  string email=3;
+  int32 acc=4;
+}
+
+message AdminDelete{
+  int32 adminId=1;
+}
+
+service AdminService{
+  rpc createAdmin(AdminDetails) returns(AdminDetails);
+  rpc deteleAdmin(AdminDelete) returns(google.protobuf.Empty);
+}
+
+

@@ -155,34 +155,33 @@ public class MaintenanceServiceImpl implements MaintenanceService {
         Map<Integer, Integer> defaultedMaintenanceCounts = new HashMap<>();
 
         for (Integer ownerId : ownerIds) {
-            int defaultedCount = countDefaultedMaintenances(ownerId);
-            defaultedMaintenanceCounts.put(ownerId, defaultedCount);
+            int noOfDefaults = countDefaultedMaintenances(ownerId);
+            defaultedMaintenanceCounts.put(ownerId, noOfDefaults);
         }
 
-        // Find owner with the highest count of defaulted maintenances
-        Integer ownerIdWithMostDefaults = null;
+        Integer mostDefaultedOwner = null;
         int maxDefaults = 0;
         for (Map.Entry<Integer, Integer> entry : defaultedMaintenanceCounts.entrySet()) {
             Integer ownerId = entry.getKey();
             Integer count = entry.getValue();
             if (count > maxDefaults) {
                 maxDefaults = count;
-                ownerIdWithMostDefaults = ownerId;
+                mostDefaultedOwner = ownerId;
             }
         }
 
-        return ownerIdWithMostDefaults;
+        return mostDefaultedOwner;
     }
 
     private int countDefaultedMaintenances(Integer ownerId) {
         List<Maintenance> maintenances = maintenanceRepository.findByOwnerId(ownerId);
-        int defaultedCount = 0;
+        int noOfDefaults = 0;
         for (Maintenance maintenance : maintenances) {
             if (maintenance.getStatus() == PaymentStatus.NOT_PAID) {
-                defaultedCount++;
+                noOfDefaults++;
             }
         }
-        return defaultedCount;
+        return noOfDefaults;
     }
 
 

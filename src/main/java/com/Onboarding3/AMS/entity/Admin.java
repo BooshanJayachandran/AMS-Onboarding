@@ -22,6 +22,8 @@ public class Admin {
 
     private String email;
 
+    private Integer acc;
+
     private String accountName;
 
 }

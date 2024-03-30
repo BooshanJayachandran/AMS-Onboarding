@@ -28,16 +28,13 @@ public class PaymentServiceImpl implements PaymentService {
     public Payment makePayment(Payment payment) {
         Payment madePayment = paymentRepository.save(payment);
 
-        // After saving the payment, update the maintenance status
         maintenanceService.updateMaintenanceStatus(payment.getMaintenanceId());
 
-        // Check if there are any existing maintenance records for the owner
         Maintenance maintenance = maintenanceRepository.findById(payment.getMaintenanceId()).orElse(null);
         if (maintenance != null) {
             int ownerId = maintenance.getOwnerId();
             List<Maintenance> existingMaintenanceRecords = maintenanceRepository.findByOwnerId(ownerId);
 
-            // If there are existing maintenance records, reconcile them
             if (!existingMaintenanceRecords.isEmpty()) {
                 maintenanceService.reconcileMaintenance(ownerId);
             }

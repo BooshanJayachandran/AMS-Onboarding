@@ -58,7 +58,9 @@ public class AdminController {
 
         existingAdmin.setName(admin.getName());
         existingAdmin.setEmail(admin.getEmail());
+        existingAdmin.setAcc(admin.getAcc());
         existingAdmin.setAccountName(admin.getAccountName());
+
 
         adminService.saveAdmin(existingAdmin);
 
