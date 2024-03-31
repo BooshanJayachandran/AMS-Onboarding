@@ -3,7 +3,6 @@ import "google/protobuf/empty.proto";
 package com.Onboarding3.AMS;
 option java_multiple_files =  true;
 
-
 message AdminDetails{
   int32 adminId=1;
   string name=2;
@@ -11,13 +10,36 @@ message AdminDetails{
   int32 acc=4;
 }
 
-message AdminDelete{
-  int32 adminId=1;
+message GetAdminRequest {
+  int32 adminId = 1;
 }
 
+message AdminResponse {
+  int32 adminId = 1;
+  string name = 2;
+  string email = 3;
+  int32 acc = 4;
+}
+
+message UpdateAdminRequest {
+  int32 adminId = 1;
+  string name = 2;
+  string email = 3;
+  int32 acc = 4;
+}
+
+message DeleteAdminRequest {
+  int32 adminId = 1;
+}
+
+message DeleteAdminResponse {
+  bool success = 1;
+}
 service AdminService{
   rpc createAdmin(AdminDetails) returns(AdminDetails);
-  rpc deteleAdmin(AdminDelete) returns(google.protobuf.Empty);
+  rpc getAdmin(GetAdminRequest) returns (AdminResponse);
+  rpc updateAdmin(UpdateAdminRequest) returns (AdminResponse);
+  rpc deleteAdmin(DeleteAdminRequest) returns (DeleteAdminResponse);
 }
 
 

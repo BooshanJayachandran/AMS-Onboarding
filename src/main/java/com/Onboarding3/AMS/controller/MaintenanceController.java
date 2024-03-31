@@ -9,6 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/maintenance")
 public class MaintenanceController {
@@ -31,20 +34,40 @@ public class MaintenanceController {
         }
     }
 
-    @GetMapping("/findOwnerWithMostDefaults")
-    public ResponseEntity<Integer> findOwnerWithMostDefaultedMaintenances() {
+//    @GetMapping("/findOwnerWithMostDefaults")
+//    public ResponseEntity<Integer> findOwnerWithMostDefaultedMaintenances() {
+//        try {
+//            Integer ownerId = maintenanceService.findOwnerWithMostDefaultedMaintenances();
+//            if (ownerId != null) {
+//                LOGGER.info("Owner with most defaulted maintenances: {}", ownerId);
+//                return new ResponseEntity<>(ownerId, HttpStatus.OK);
+//            } else {
+//                LOGGER.info("No owners found with defaulted maintenances");
+//                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//            }
+//        } catch (Exception e) {
+//            LOGGER.error("Error occurred while finding owner with most defaulted maintenances", e);
+//            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//    }
+//}
+
+
+    @GetMapping("/findTopNDefaulters")
+    public ResponseEntity<Map<Integer, Integer>> findTopNDefaulters(@RequestParam int n) {
         try {
-            Integer ownerId = maintenanceService.findOwnerWithMostDefaultedMaintenances();
-            if (ownerId != null) {
-                LOGGER.info("Owner with most defaulted maintenances: {}", ownerId);
-                return new ResponseEntity<>(ownerId, HttpStatus.OK);
+            Map<Integer, Integer> defaulters = maintenanceService.findTopNDefaulters(n);
+            if (!defaulters.isEmpty()) {
+                LOGGER.info("Top {} most frequent defaulters: {}", n, defaulters);
+                return new ResponseEntity<>(defaulters, HttpStatus.OK);
             } else {
-                LOGGER.info("No owners found with defaulted maintenances");
+                LOGGER.info("No defaulters found");
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
         } catch (Exception e) {
-            LOGGER.error("Error occurred while finding owner with most defaulted maintenances", e);
+            LOGGER.error("Error occurred while finding top defaulters", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 }

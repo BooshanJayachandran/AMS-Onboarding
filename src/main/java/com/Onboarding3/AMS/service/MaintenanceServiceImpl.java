@@ -7,9 +7,7 @@ import com.Onboarding3.AMS.repository.PaymentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class MaintenanceServiceImpl implements MaintenanceService {
@@ -82,57 +80,6 @@ public class MaintenanceServiceImpl implements MaintenanceService {
     }
 
 
-
-
-
-//    public void reconcileMaintenance(Integer ownerId) {
-//        List<Maintenance> maintenanceRecords = maintenanceRepository.findByOwnerId(ownerId);
-//
-//        // If there's only one maintenance record, handle it separately
-//        if (maintenanceRecords.size() == 1) {
-//            Maintenance maintenance = maintenanceRecords.get(0);
-//            if (maintenance.getStatus() == PaymentStatus.NOT_PAID) {
-//                maintenance.setCharge(0); // No charge for the first maintenance
-//            }
-//            maintenanceRepository.save(maintenance);
-//            return;
-//        }
-//
-//        for (int i = 1; i < maintenanceRecords.size(); i++) {
-//            Maintenance currentMaintenance = maintenanceRecords.get(i);
-//            Maintenance previousMaintenance = maintenanceRecords.get(i - 1);
-//
-//            // Calculate the new amountPayable for the current maintenance
-//            int amountPaid = paymentRepository.findTotalAmountPaidByMaintenanceId(previousMaintenance.getMaintenanceId());
-//            int remainingAmount = previousMaintenance.getAmountPayable() - amountPaid;
-//
-//            // Set the charge and amountPayable based on the status of the current maintenance and the previous maintenance
-//            int charge = 0;
-//            if (previousMaintenance.getStatus() == PaymentStatus.PARTIALLY_PAID) {
-//                // If the previous maintenance was partially paid, set charge to 0
-//                charge = 0;
-//            } else if (currentMaintenance.getStatus() == PaymentStatus.NOT_PAID) {
-//                // If the current maintenance is NOT_PAID, set the charge to 800
-//                charge = 800;
-//            }
-//
-//            // Calculate current amount payable considering charge
-//            int currentAmountPayable = remainingAmount + currentMaintenance.getAmount().intValue() + charge;
-//
-//            // Update the charge and amountPayable for the current maintenance
-//            currentMaintenance.setCharge(charge);
-//            currentMaintenance.setAmountPayable(currentAmountPayable);
-//
-//            // Update the maintenance status and save the current maintenance record
-//            updateMaintenanceStatus(currentMaintenance.getMaintenanceId());
-//            maintenanceRepository.save(currentMaintenance);
-//        }
-//    }
-
-
-
-
-
     @Override
     public void updateMaintenanceStatus(Integer maintenanceId) {
         Maintenance maintenance = maintenanceRepository.findById(maintenanceId).orElse(null);
@@ -149,8 +96,32 @@ public class MaintenanceServiceImpl implements MaintenanceService {
         }
     }
 
+//    @Override
+//    public Integer findOwnerWithMostDefaultedMaintenances() {
+//        List<Integer> ownerIds = maintenanceRepository.getAllOwnerIds();
+//        Map<Integer, Integer> defaultedMaintenanceCounts = new HashMap<>();
+//
+//        for (Integer ownerId : ownerIds) {
+//            int noOfDefaults = countDefaultedMaintenances(ownerId);
+//            defaultedMaintenanceCounts.put(ownerId, noOfDefaults);
+//        }
+//
+//        Integer mostDefaultedOwner = null;
+//        int maxDefaults = 0;
+//        for (Map.Entry<Integer, Integer> entry : defaultedMaintenanceCounts.entrySet()) {
+//            Integer ownerId = entry.getKey();
+//            Integer count = entry.getValue();
+//            if (count > maxDefaults) {
+//                maxDefaults = count;
+//                mostDefaultedOwner = ownerId;
+//            }
+//        }
+//
+//        return mostDefaultedOwner;
+//    }
+
     @Override
-    public Integer findOwnerWithMostDefaultedMaintenances() {
+    public Map<Integer, Integer> findTopNDefaulters(int n) {
         List<Integer> ownerIds = maintenanceRepository.getAllOwnerIds();
         Map<Integer, Integer> defaultedMaintenanceCounts = new HashMap<>();
 
@@ -159,18 +130,20 @@ public class MaintenanceServiceImpl implements MaintenanceService {
             defaultedMaintenanceCounts.put(ownerId, noOfDefaults);
         }
 
-        Integer mostDefaultedOwner = null;
-        int maxDefaults = 0;
+        PriorityQueue<Map.Entry<Integer, Integer>> topNDefaultersQueue = new PriorityQueue<>(
+                (a, b) -> b.getValue().compareTo(a.getValue()));
+
         for (Map.Entry<Integer, Integer> entry : defaultedMaintenanceCounts.entrySet()) {
-            Integer ownerId = entry.getKey();
-            Integer count = entry.getValue();
-            if (count > maxDefaults) {
-                maxDefaults = count;
-                mostDefaultedOwner = ownerId;
-            }
+            topNDefaultersQueue.offer(entry);
         }
 
-        return mostDefaultedOwner;
+        Map<Integer, Integer> topNDefaulters = new HashMap<>();
+        for (int i = 0; i < n && !topNDefaultersQueue.isEmpty(); i++) {
+            Map.Entry<Integer, Integer> entry = topNDefaultersQueue.poll();
+            topNDefaulters.put(entry.getKey(), entry.getValue());
+        }
+
+        return topNDefaulters;
     }
 
     private int countDefaultedMaintenances(Integer ownerId) {
