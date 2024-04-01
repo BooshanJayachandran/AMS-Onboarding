@@ -3,6 +3,7 @@ package com.Onboarding3.AMS.controller;
 import com.Onboarding3.AMS.entity.CheckInOut;
 import com.Onboarding3.AMS.service.CheckInOutService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -95,5 +96,13 @@ public class CheckInOutController {
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+
+    @GetMapping("/mostActiveEmployee")
+    public ResponseEntity<Integer> getMostActiveEmployeeId(
+            @RequestParam("start") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
+            @RequestParam("end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
+        Integer mostActiveEmployeeId = checkInOutService.findMostActiveEmployeeId(start, end);
+        return new ResponseEntity<>(mostActiveEmployeeId, HttpStatus.OK);
     }
 }

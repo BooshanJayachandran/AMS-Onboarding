@@ -2,6 +2,7 @@ package com.Onboarding3.AMS.service;
 
 import com.Onboarding3.AMS.entity.CheckInOut;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,5 +27,8 @@ public interface CheckInOutService {
     CheckInOut getLatestCheckInByUserId(Integer userId);
 
     List<CheckInOut> findByDateTimeRange(LocalDate date, LocalDateTime checkInTime, LocalDateTime checkOutTime);
+
+    Duration calculateEmployeeTotalDuration(Integer id, LocalDate startDate, LocalDate endDate);
+    Integer findMostActiveEmployeeId(LocalDate startDate, LocalDate endDate);
 
 }

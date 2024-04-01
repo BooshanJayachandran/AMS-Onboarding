@@ -5,9 +5,13 @@ import com.Onboarding3.AMS.repository.CheckInOutRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class CheckInOutServiceImpl implements CheckInOutService {
@@ -75,4 +79,40 @@ public class CheckInOutServiceImpl implements CheckInOutService {
     public CheckInOut getLatestCheckInByUserId(Integer userId) {
         return checkInOutRepository.findLatestCheckInByUserId(userId);
     }
+
+    @Override
+    public Duration calculateEmployeeTotalDuration(Integer id, LocalDate startDate, LocalDate endDate) {
+        List<CheckInOut> checkInsOuts = checkInOutRepository.findByUserIdAndDateBetween(id, startDate, endDate);
+        Duration totalDuration = Duration.ZERO;
+        LocalDateTime previousCheckOutTime = null;
+        for (CheckInOut checkInOut : checkInsOuts) {
+            if (checkInOut.getCheckOutTime() != null) {
+                LocalDateTime checkIn = checkInOut.getCheckInTime();
+                LocalDateTime checkOut = checkInOut.getCheckOutTime();
+                if (previousCheckOutTime != null && previousCheckOutTime.isAfter(checkIn)) {
+                    checkIn = previousCheckOutTime;
+                }
+                totalDuration = totalDuration.plus(Duration.between(checkIn, checkOut));
+                previousCheckOutTime = checkOut;
+            }
+        }
+        return totalDuration;
+    }
+
+    @Override
+    public Integer findMostActiveEmployeeId(LocalDate startDate, LocalDate endDate) {
+        List<CheckInOut> allCheckInsOuts = checkInOutRepository.findByDateBetween(startDate, endDate);
+        Map<Integer, Duration> employeeTotalDurations = new HashMap<>();
+        for (CheckInOut checkInOut : allCheckInsOuts) {
+            Integer id = checkInOut.getUserId();
+            Duration totalDuration = employeeTotalDurations.getOrDefault(id, Duration.ZERO);
+            LocalDateTime checkIn = checkInOut.getCheckInTime();
+            LocalDateTime checkOut = checkInOut.getCheckOutTime() != null ? checkInOut.getCheckOutTime() : LocalDateTime.now();
+            totalDuration = totalDuration.plus(Duration.between(checkIn, checkOut));
+            employeeTotalDurations.put(id, totalDuration);
+        }
+        Integer mostActiveEmployeeId = Collections.max(employeeTotalDurations.entrySet(), Map.Entry.comparingByValue()).getKey();
+        return mostActiveEmployeeId;
+    }
+
 }
